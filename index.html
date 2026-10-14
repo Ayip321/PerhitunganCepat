@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14532d">
+<title>Quick Count Pilkades Desa Kawo — Online</title>
+<style>
+:root{--g:#14532d;--g2:#166534;--bg:#f3f6f4;--line:#dce5de;--muted:#647067;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#17211b;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,#14532d,#15803d);color:#fff;padding:20px 14px} .wrap{max-width:1100px;margin:auto;padding:0 14px}
+h1{font-size:clamp(22px,4vw,30px);margin:0 0 5px}header p{margin:0;color:#e3f4e7}
+main{padding-top:14px;padding-bottom:30px}.notice{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;border-radius:10px;padding:11px 13px;margin-bottom:13px;font-size:13px}
+.panel,.stat,.card{background:white;border:1px solid var(--line);border-radius:13px;padding:14px;box-shadow:0 2px 7px #102a1510;margin-bottom:12px}
+.panel h2{font-size:18px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+input,select,button{font:inherit}input,select{width:100%;padding:10px;border:1px solid #cbd8ce;border-radius:8px;background:#fff}
+button{border:0;border-radius:9px;padding:10px 13px;font-weight:650;cursor:pointer;background:#e5eee7;color:#183c25}
+button.primary{background:var(--g);color:#fff}button.red{background:#fee2e2;color:#991b1b}button:disabled{opacity:.5;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.stat{margin:0}.stat small{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:clamp(20px,3vw,27px);display:block;margin-top:3px}
+.chartwrap{height:300px;position:relative;margin:8px 0 18px}.chartwrap canvas{width:100%;height:100%;display:block}.chartlegend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.chartlegend span{display:inline-flex;align-items:center;gap:5px}.dot{width:10px;height:10px;border-radius:2px;display:inline-block}#candidateTotals{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.ct{border:1px solid var(--line);border-radius:10px;padding:10px}.ct b{display:block;font-size:20px}.ct small{color:var(--muted)}
+#tpsList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:11px}.card{padding:0;overflow:hidden;margin:0}.cardhead{padding:12px 14px;background:#edf5ef;display:flex;justify-content:space-between;gap:10px}.cardhead h3{margin:0;font-size:16px}.cardbody{padding:14px}
+.fieldgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}.field input[readonly]{background:#f4f7f4}
+.candrow{display:grid;grid-template-columns:1fr 100px;gap:9px;align-items:center;margin:8px 0}.candrow label{font-size:14px}
+#status{font-size:13px;margin-top:8px}.ok{color:#166534}.err{color:#b91c1c}
+.hidden{display:none!important}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+footer{color:var(--muted);font-size:12px;padding:15px 0}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.row>*{flex-basis:100%}}
+@media print{header{background:#fff;color:#000}header p,.toolbar,#loginPanel,#inputPanel button,.notice{display:none!important}body{background:#fff}.panel,.stat,.card{box-shadow:none;break-inside:avoid}#tpsList{display:block}.card{margin:8px 0}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>PERHITUNGAN CEPAT PILKADES DESA KAWO</h1><p>Dashboard online · 18 TPS · Data bersama secara langsung</p></div></header>
+<main class="wrap">
+<div class="notice"><b>Penting:</b> Quick count ini adalah rekap sementara, bukan hasil resmi. Data hasil dapat dilihat publik. Hanya petugas yang login dan diberi akses TPS yang bisa mengubah input. Jangan masukkan kata sandi ke orang lain.</div>
+
+<section class="panel" id="loginPanel">
+<h2>Login petugas / admin</h2>
+<div class="row"><div><label class="muted" for="email">Email</label><input id="email" type="email" autocomplete="username" placeholder="email petugas"></div><div><label class="muted" for="password">Kata sandi</label><input id="password" type="password" autocomplete="current-password" placeholder="kata sandi"></div></div>
+<div class="toolbar"><button class="primary" id="loginBtn">Login</button><button id="logoutBtn" class="hidden">Logout</button></div>
+<div class="muted">Masyarakat bisa melihat dashboard tanpa login. Login hanya untuk petugas yang akunnya sudah dibuat admin.</div><div id="status" role="status"></div>
+</section>
+
+<section class="stats">
+<div class="stat"><small>Total DPT</small><strong id="sDpt">7.827</strong></div>
+<div class="stat"><small>Suara masuk</small><strong id="sMasuk">0</strong></div>
+<div class="stat"><small>TPS ada input</small><strong id="sTps">0/18</strong></div>
+<div class="stat"><small>Partisipasi tercatat</small><strong id="sPart">0%</strong></div>
+</section>
+
+<section class="panel"><h2>Diagram hasil suara — live</h2><p class="muted">Diagram batang berubah otomatis saat data TPS diperbarui.</p><div class="chartwrap"><canvas id="resultsChart" aria-label="Diagram batang hasil suara kandidat"></canvas></div><div class="chartlegend" id="chartLegend"></div><h2 style="margin-top:20px">Rekap suara kandidat — live</h2><div id="candidateTotals"></div><p id="summaryNote" class="muted">Menunggu koneksi database…</p></section>
+
+<section class="panel hidden" id="inputPanel">
+<h2>Input hasil TPS</h2>
+<p class="muted">Petugas hanya dapat mengubah TPS yang ditugaskan. Setelah menekan Simpan, data akan langsung muncul di dashboard bersama.</p>
+<div class="field" style="max-width:520px"><label for="tpsSelect">Pilih TPS yang ditugaskan</label><select id="tpsSelect"></select></div>
+<div id="editArea" class="hidden" style="margin-top:12px">
+<div id="tpsTitle"></div>
+<div class="fieldgrid">
+<div class="field"><label>Suara sah (otomatis)</label><input id="valid" readonly value="0"></div>
+<div class="field"><label for="invalid">Suara tidak sah</label><input id="invalid" type="number" min="0" step="1" inputmode="numeric" value="0"></div>
+<div class="field"><label>Total suara masuk</label><input id="total" readonly value="0"></div>
+<div class="field"><label>Sisa DPT (perkiraan)</label><input id="remaining" readonly value="0"></div>
+</div>
+<div style="font-weight:700;margin:14px 0 8px">Suara per calon</div>
+<div id="candidateInputs"></div>
+<div class="field" style="margin-top:10px"><label for="notes">Catatan / nomor formulir (opsional)</label><input id="notes" placeholder="Contoh: sumber formulir hasil TPS"></div>
+<div class="toolbar"><button class="primary" id="saveBtn">Simpan hasil TPS</button><button id="reloadBtn">Muat ulang data TPS</button></div>
+<div id="saveStatus" class="muted"></div>
+</div>
+</section>
+
+<section class="panel">
+<div class="row"><div><h2 style="margin:0">Rekap per TPS</h2><p class="muted">Diperbarui otomatis saat data berubah.</p></div><div><input id="search" placeholder="Cari wilayah / TPS"></div></div>
+<div class="toolbar"><button id="csvBtn">Unduh rekap CSV</button><button id="printBtn">Cetak / Simpan PDF</button></div>
+<div id="tpsList"></div>
+</section>
+<footer>Quick Count Pilkades Desa Kawo · Gunakan hasil sebagai informasi sementara dan cocokkan dengan formulir hasil TPS.</footer>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// LANGKAH SETUP: isi konfigurasi Firebase dari Firebase Console > Project settings > Your apps.
+const firebaseConfig = {
+  apiKey: "ISI_API_KEY",
+  authDomain: "ISI_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://ISI_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "ISI_PROJECT_ID",
+  appId: "ISI_APP_ID"
+};
+
+const candidates=[
+ {id:"tandar",name:"1. Tandar"},{id:"ahyar",name:"2. Ahyar Alimudin"},
+ {id:"imran",name:"3. Imran"},{id:"ali",name:"4. Ali Husrin"},{id:"herman",name:"5. Herman Edy"}
+];
+const tpsData=[
+ ["BUMI GORA",1,502],["PENGADANG",2,453],["PENGADANG",3,407],["BATU BANGKE",4,541],
+ ["BALE MONTONG I",5,481],["BALE MONTONG I",6,490],["PANCE",7,359],["GONJONG",8,294],
+ ["BALE MONTONG II",9,577],["BUNTERENG & BALE MONTONG II",10,536],["DAYEN KUBUR",11,405],
+ ["KARANG JANGKONG",12,358],["BALEN ALONG",13,399],["SARANG ANGIN",14,328],
+ ["GUBUK DIREK",15,580],["KARANG DAYE",16,412],["GAMPUNG & WARENG",17,592],["GILIK",18,554]
+];
+const $=id=>document.getElementById(id), fmt=n=>Number(n||0).toLocaleString("id-ID"), key=n=>String(n).padStart(3,"0");
+const blank=()=>({votes:{tandar:0,ahyar:0,imran:0,ali:0,herman:0},invalid:0,notes:"",updatedAt:null,updatedBy:""});
+let app,auth,db,user=null,profile=null,allResults={},selectedNo=null,stopResults=null;
+const configured=!firebaseConfig.apiKey.startsWith("ISI_") && !firebaseConfig.projectId.startsWith("ISI_");
+function say(msg,cls=""){ $("status").className=cls; $("status").textContent=msg; }
+function total(r){const valid=candidates.reduce((s,c)=>s+num(r?.votes?.[c.id]),0),invalid=num(r?.invalid);return {valid,invalid,all:valid+invalid};}
+function num(v){const n=Number(v);return Number.isFinite(n)&&n>=0?Math.floor(n):0;}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function init(){
+ if(!configured){say("Aplikasi belum tersambung ke Firebase. Ikuti petunjuk SETUP-ID.txt, lalu isi firebaseConfig di file index.html.","err");$("loginBtn").disabled=true;render();return;}
+ try{
+  app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);
+  onValue(ref(db,"results"),snap=>{allResults=snap.val()||{};render();if(selectedNo)loadSelected();},err=>say("Gagal membaca data: "+err.message,"err"));
+  onAuthStateChanged(auth,async u=>{
+   user=u;profile=null;
+   $("logoutBtn").classList.toggle("hidden",!u);
+   $("loginBtn").classList.toggle("hidden",!!u);
+   if(u){
+    try{const p=await get(ref(db,"users/"+u.uid));profile=p.val()||null;}catch(e){}
+    if(profile){$("inputPanel").classList.remove("hidden");populateTPS();say("Login sebagai "+(profile.displayName||u.email)+" · Peran: "+profile.role,"ok");}
+    else{$("inputPanel").classList.add("hidden");say("Akun login belum diberi profil akses oleh admin. Hubungi admin.","err");}
+   }else{$("inputPanel").classList.add("hidden");say("Anda belum login. Dashboard tetap bisa dilihat publik.");}
+   render();
+  });
+ }catch(e){say("Konfigurasi Firebase belum benar: "+e.message,"err");}
+}
+function populateTPS(){
+ const sel=$("tpsSelect"),old=sel.value;sel.innerHTML="";
+ const assigned=profile?.role==="admin"?tpsData.map(x=>x[1]):tpsData.filter(x=>profile?.assignedTps?.[key(x[1])]===true).map(x=>x[1]);
+ assigned.forEach(no=>{const t=tpsData.find(x=>x[1]===no),o=document.createElement("option");o.value=no;o.textContent=`TPS ${key(no)} — ${t[0]} (DPT ${t[2]})`;sel.appendChild(o);});
+ if(old&&assigned.includes(Number(old)))sel.value=old;
+ selectedNo=sel.value?Number(sel.value):null;
+ $("editArea").classList.toggle("hidden",!selectedNo);
+ if(selectedNo)loadSelected();
+}
+function loadSelected(){
+ if(!selectedNo)return;
+ const t=tpsData.find(x=>x[1]===selectedNo);if(!t)return;
+ const r={...blank(),...(allResults[key(selectedNo)]||{})};r.votes={...blank().votes,...(r.votes||{})};
+ $("tpsTitle").innerHTML=`<b>${esc(t[0])} · TPS ${key(t[1])} · DPT ${fmt(t[2])}</b>`;
+ $("invalid").value=num(r.invalid);$("notes").value=r.notes||"";
+ $("candidateInputs").innerHTML=candidates.map(c=>`<div class="candrow"><label for="v-${c.id}">${esc(c.name)}</label><input id="v-${c.id}" data-candidate="${c.id}" type="number" min="0" step="1" inputmode="numeric" value="${num(r.votes[c.id])}"></div>`).join("");
+ updateEditor();
+}
+function updateEditor(){
+ const t=tpsData.find(x=>x[1]===selectedNo);if(!t)return;
+ const valid=candidates.reduce((s,c)=>s+num($("v-"+c.id)?.value),0),invalid=num($("invalid").value),all=valid+invalid;
+ $("valid").value=valid;$("total").value=all;$("remaining").value=t[2]-all;
+ $("remaining").style.color=all>t[2]?"#b91c1c":"";
+}
+function canEdit(no){return !!user&&!!profile&&(profile.role==="admin"||profile.assignedTps?.[key(no)]===true);}
+async function saveSelected(){
+ if(!selectedNo||!canEdit(selectedNo)){ $("saveStatus").textContent="Akun ini tidak punya akses mengubah TPS tersebut.";return;}
+ const t=tpsData.find(x=>x[1]===selectedNo),votes={};candidates.forEach(c=>votes[c.id]=num($("v-"+c.id).value));
+ const invalid=num($("invalid").value),all=Object.values(votes).reduce((a,b)=>a+b,0)+invalid;
+ if(all>t[2]&&!confirm("Jumlah suara masuk melebihi DPT TPS ini. Tetap simpan?"))return;
+ const payload={votes,invalid,notes:$("notes").value.trim(),updatedAt:new Date().toISOString(),updatedBy:user.email||user.uid};
+ $("saveBtn").disabled=true;$("saveStatus").textContent="Menyimpan…";
+ try{await set(ref(db,"results/"+key(selectedNo)),payload);$("saveStatus").textContent="Tersimpan. Dashboard bersama akan diperbarui otomatis.";}
+ catch(e){$("saveStatus").textContent="Gagal menyimpan: "+e.message;}
+ finally{$("saveBtn").disabled=false;}
+}
+function drawChart(values){
+ const canvas=$("resultsChart"); if(!canvas)return;
+ const rect=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+ const w=Math.max(300,rect.width),h=Math.max(220,rect.height);
+ canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);
+ const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+ const colors=["#166534","#2563eb","#d97706","#7c3aed","#dc2626"];
+ const left=44,right=12,top=18,bottom=55,plotW=w-left-right,plotH=h-top-bottom;
+ const maxVal=Math.max(10,...values.map(v=>v.value));const nice=Math.pow(10,Math.floor(Math.log10(maxVal)));const upper=Math.ceil(maxVal/nice)*nice;
+ ctx.font="11px system-ui";ctx.textAlign="right";ctx.textBaseline="middle";
+ for(let i=0;i<=4;i++){const v=upper*i/4,y=top+plotH-plotH*i/4;ctx.strokeStyle="#e2e8e3";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.fillStyle="#647067";ctx.fillText(fmt(Math.round(v)),left-7,y);}
+ const slot=plotW/values.length,barW=Math.min(48,slot*.55);
+ values.forEach((item,i)=>{const bh=plotH*(item.value/upper),x=left+slot*i+(slot-barW)/2,y=top+plotH-bh;ctx.fillStyle=colors[i%colors.length];ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,barW,bh,4):ctx.rect(x,y,barW,bh);ctx.fill();ctx.fillStyle="#17211b";ctx.textAlign="center";ctx.textBaseline="bottom";ctx.font="bold 11px system-ui";ctx.fillText(fmt(item.value),x+barW/2,Math.max(top+10,y-4));ctx.save();ctx.translate(x+barW/2,top+plotH+12);ctx.rotate(-.28);ctx.textAlign="right";ctx.textBaseline="middle";ctx.font="11px system-ui";ctx.fillStyle="#374151";ctx.fillText(item.name,0,0);ctx.restore();});
+ $("chartLegend").innerHTML=values.map((v,i)=>`<span><i class="dot" style="background:${colors[i%colors.length]}"></i>${esc(v.name)}: ${fmt(v.value)}</span>`).join("");
+}
+function render(){
+ let dpt=0,masuk=0,filled=0,invalid=0;const ct={};candidates.forEach(c=>ct[c.id]=0);
+ tpsData.forEach(([a,no,d])=>{dpt+=d;const r=allResults[key(no)]||blank(),t=total(r);masuk+=t.all;invalid+=t.invalid;if(t.all>0||r.updatedAt)filled++;candidates.forEach(c=>ct[c.id]+=num(r.votes?.[c.id]));});
+ $("sDpt").textContent=fmt(dpt);$("sMasuk").textContent=fmt(masuk);$("sTps").textContent=`${filled}/18`;$("sPart").textContent=(dpt?masuk/dpt*100:0).toFixed(1).replace(".",",")+"%";
+ $("candidateTotals").innerHTML=candidates.map(c=>`<div class="ct"><small>${esc(c.name)}</small><b>${fmt(ct[c.id])}</b><small>${masuk-invalid?((ct[c.id]/(masuk-invalid))*100).toFixed(1).replace(".",","):"0,0"}% dari suara sah</small></div>`).join("");
+ $("summaryNote").textContent=`Suara sah ${fmt(masuk-invalid)} · Suara tidak sah ${fmt(invalid)} · Data diperbarui secara langsung dari database.`;
+ drawChart(candidates.map(c=>({name:c.name.replace(/^\d+\.\s*/, ""),value:ct[c.id]})));
+ const q=$("search").value.toLowerCase();$("tpsList").innerHTML=tpsData.filter(([a,no,d])=>(`${a} TPS ${key(no)}`).toLowerCase().includes(q)).map(([a,no,d])=>{
+  const r=allResults[key(no)]||blank(),t=total(r),pct=d?t.all/d*100:0;
+  return `<article class="card"><div class="cardhead"><div><h3>${esc(a)}</h3><span class="muted">TPS ${key(no)} · DPT ${fmt(d)}</span></div><span class="muted">${r.updatedAt?"Ada data":"Belum ada data"}</span></div><div class="cardbody"><div class="fieldgrid"><div class="field"><label>Suara sah</label><input readonly value="${t.valid}"></div><div class="field"><label>Suara tidak sah</label><input readonly value="${t.invalid}"></div><div class="field"><label>Total masuk</label><input readonly value="${t.all}"></div><div class="field"><label>Sisa DPT perkiraan</label><input readonly value="${d-t.all}"></div></div><div style="margin-top:10px">${candidates.map(c=>`<div class="row" style="margin:5px 0"><span>${esc(c.name)}</span><b style="text-align:right">${fmt(r.votes?.[c.id])}</b></div>`).join("")}</div><p class="muted">${r.updatedAt?"Update: "+esc(new Date(r.updatedAt).toLocaleString("id-ID")):"Belum diinput"}${r.updatedBy?" · "+esc(r.updatedBy):""}</p>${t.all>d?'<b class="err">Peringatan: suara masuk melebihi DPT</b>':""}</div></article>`;
+ }).join("");
+}
+$("loginBtn").addEventListener("click",async()=>{if(!auth)return;say("Mencoba login…");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);$("password").value="";}catch(e){say("Login gagal. Periksa email/kata sandi atau hubungi admin. ("+e.code+")","err");}});
+$("logoutBtn").addEventListener("click",()=>signOut(auth));
+$("tpsSelect").addEventListener("change",()=>{selectedNo=Number($("tpsSelect").value)||null;$("editArea").classList.toggle("hidden",!selectedNo);loadSelected();});
+$("candidateInputs").addEventListener("input",updateEditor);$("invalid").addEventListener("input",updateEditor);
+$("saveBtn").addEventListener("click",saveSelected);$("reloadBtn").addEventListener("click",loadSelected);
+$("search").addEventListener("input",render);$("printBtn").addEventListener("click",()=>window.print());
+$("csvBtn").addEventListener("click",()=>{
+ const rows=[["TPS","Wilayah","DPT",...candidates.map(c=>c.name),"Suara Sah","Suara Tidak Sah","Total Masuk","Sisa DPT","Terakhir diperbarui"]];
+ tpsData.forEach(([a,no,d])=>{const r=allResults[key(no)]||blank(),t=total(r);rows.push([key(no),a,d,...candidates.map(c=>num(r.votes?.[c.id])),t.valid,t.invalid,t.all,d-t.all,r.updatedAt||""]);});
+ const csv="\ufeff"+rows.map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+ const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download="rekap-quick-count-kawo.csv";a.click();URL.revokeObjectURL(url);
+});
+window.addEventListener("resize",()=>drawChart(candidates.map(c=>({name:c.name.replace(/^\d+\.\s*/, ""),value:candidates.reduce((s,c)=>s+num(allResults[key(1)]?.votes?.[c.id]),0)}))));
+render();init();
+</script>
+</body>
+</html>
