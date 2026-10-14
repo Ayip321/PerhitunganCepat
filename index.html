@@ -1,16 +1,114 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14532d"><title>Quick Count Pilkades Desa Kawo</title>
-<style>
+<html lang="id">
+ <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#14532d">
+  <title>Quick Count Pilkades Desa Kawo</title>
+  <style>
 :root{--g:#14532d;--bg:#f3f6f4;--line:#dce5de;--muted:#647067}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#17211b;font:15px/1.45 system-ui,Arial,sans-serif}header{background:linear-gradient(135deg,#14532d,#15803d);color:#fff;padding:20px 14px}.wrap{max-width:1100px;margin:auto;padding:0 14px}h1{font-size:clamp(22px,4vw,30px);margin:0 0 5px}header p{margin:0;color:#e3f4e7}main{padding-top:14px;padding-bottom:30px}.notice,.panel,.stat,.card{background:white;border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:12px}.notice{background:#fff7ed;color:#9a3412;border-color:#fed7aa;font-size:13px}.panel h2{font-size:18px;margin:0 0 12px}.muted{color:var(--muted);font-size:13px}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}input,select,button{font:inherit}input,select{width:100%;padding:10px;border:1px solid #cbd8ce;border-radius:8px;background:#fff}button{border:0;border-radius:9px;padding:10px 13px;font-weight:650;cursor:pointer;background:#e5eee7;color:#183c25}button.primary{background:var(--g);color:#fff}button:disabled{opacity:.5}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.stat{margin:0}.stat small{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:clamp(20px,3vw,27px);display:block;margin-top:3px}#candidateTotals{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.ct{border:1px solid var(--line);border-radius:10px;padding:10px}.ct b{display:block;font-size:20px}.ct small{color:var(--muted)}#tpsList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:11px}.card{padding:0;overflow:hidden;margin:0}.cardhead{padding:12px 14px;background:#edf5ef}.cardbody{padding:14px}.fieldgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}.candrow{display:grid;grid-template-columns:1fr 100px;gap:9px;align-items:center;margin:8px 0}.hidden{display:none!important}#status{font-size:13px;margin-top:8px}.err{color:#b91c1c}footer{color:var(--muted);font-size:12px;padding:15px 0}@media(max-width:600px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.row>*{flex-basis:100%}}@media print{header p,.toolbar,#loginPanel,#inputPanel button,.notice{display:none!important}body{background:#fff}}
-</style></head><body>
-<header><div class="wrap"><h1>PERHITUNGAN CEPAT PILKADES DESA KAWO</h1><p>Dashboard online · 18 TPS · Pembaruan data langsung</p></div></header><main class="wrap">
-<div class="notice"><b>Penting:</b> Ini rekap sementara, bukan hasil resmi. Hasil ditampilkan kepada publik. Hanya akun yang diberi akses melalui Firebase yang boleh menyimpan data. DPT total: 7.827. Pastikan angka DPT tiap TPS di bawah disesuaikan dengan data resmi sebelum digunakan.</div>
-<section class="panel" id="loginPanel"><h2>Login petugas / admin</h2><div class="row"><div><label class="muted" for="email">Email</label><input id="email" type="email" autocomplete="username" placeholder="Email petugas"></div><div><label class="muted" for="password">Kata sandi</label><input id="password" type="password" autocomplete="current-password" placeholder="Kata sandi"></div></div><div class="toolbar"><button class="primary" id="loginBtn">Login</button><button id="logoutBtn" class="hidden">Logout</button></div><div class="muted">Masyarakat dapat melihat dashboard tanpa login.</div><div id="status" role="status"></div></section>
-<section class="stats"><div class="stat"><small>Total DPT</small><strong id="sDpt">7.827</strong></div><div class="stat"><small>Suara masuk</small><strong id="sMasuk">0</strong></div><div class="stat"><small>TPS ada input</small><strong id="sTps">0/18</strong></div><div class="stat"><small>Partisipasi tercatat</small><strong id="sPart">0%</strong></div></section>
-<section class="panel"><h2>Rekap suara kandidat — live</h2><div id="candidateTotals"></div><p id="summaryNote" class="muted">Menghubungkan ke database…</p></section>
-<section class="panel hidden" id="inputPanel"><h2>Input hasil TPS</h2><p class="muted">Pilih TPS yang menjadi tanggung jawab akun Anda.</p><div class="field" style="max-width:520px"><label for="tpsSelect">Pilih TPS</label><select id="tpsSelect"></select></div><div id="editArea" class="hidden" style="margin-top:12px"><div id="tpsTitle"></div><div class="fieldgrid"><div class="field"><label>Suara sah</label><input id="valid" readonly value="0"></div><div class="field"><label for="invalid">Suara tidak sah</label><input id="invalid" type="number" min="0" step="1" value="0"></div><div class="field"><label>Total suara masuk</label><input id="total" readonly value="0"></div><div class="field"><label>Sisa DPT perkiraan</label><input id="remaining" readonly value="0"></div></div><div style="font-weight:700;margin:14px 0 8px">Suara per calon</div><div id="candidateInputs"></div><div class="field" style="margin-top:10px"><label for="notes">Catatan / nomor formulir (opsional)</label><input id="notes" placeholder="Contoh: sumber formulir hasil TPS"></div><div class="toolbar"><button class="primary" id="saveBtn">Simpan hasil TPS</button><button id="reloadBtn">Muat ulang</button></div><div id="saveStatus" class="muted"></div></div></section>
-<section class="panel"><div class="row"><div><h2 style="margin:0">Rekap per TPS</h2><p class="muted">Data diperbarui otomatis.</p></div><div><input id="search" placeholder="Cari TPS"></div></div><div class="toolbar"><button id="csvBtn">Unduh rekap CSV</button><button id="printBtn">Cetak / Simpan PDF</button></div><div id="tpsList"></div></section><footer>Quick Count Pilkades Desa Kawo · Cocokkan seluruh angka dengan formulir hasil TPS.</footer></main>
-<script type="module">
+</style>
+ </head>
+ <body>
+  <header>
+   <div class="wrap">
+    <h1>PERHITUNGAN CEPAT PILKADES DESA KAWO</h1>
+    <p>Dashboard online · 18 TPS · Pembaruan data langsung</p>
+   </div>
+  </header>
+  <main class="wrap">
+   <div class="notice">
+    <b>Penting:</b> Ini rekap sementara, bukan hasil resmi. Hasil ditampilkan kepada publik. Hanya akun yang diberi akses melalui Firebase yang boleh menyimpan data. DPT total: 7.827. Pastikan angka DPT tiap TPS di bawah disesuaikan dengan data resmi sebelum digunakan.
+   </div>
+   <section class="panel" id="loginPanel">
+    <h2>Login petugas / admin</h2>
+    <div class="row">
+     <div>
+      <label class="muted" for="email">Email</label><input id="email" type="email" autocomplete="username" placeholder="Email petugas">
+     </div>
+     <div>
+      <label class="muted" for="password">Kata sandi</label><input id="password" type="password" autocomplete="current-password" placeholder="Kata sandi">
+     </div>
+    </div>
+    <div class="toolbar">
+     <button class="primary" id="loginBtn">Login</button>
+     <button id="logoutBtn" class="hidden">Logout</button>
+    </div>
+    <div class="muted">Masyarakat dapat melihat dashboard tanpa login.</div>
+    <div id="status" role="status"></div>
+   </section>
+   <section class="stats">
+    <div class="stat">
+     <small>Total DPT</small><strong id="sDpt">7.827</strong>
+    </div>
+    <div class="stat">
+     <small>Suara masuk</small><strong id="sMasuk">0</strong>
+    </div>
+    <div class="stat">
+     <small>TPS ada input</small><strong id="sTps">0/18</strong>
+    </div>
+    <div class="stat">
+     <small>Partisipasi tercatat</small><strong id="sPart">0%</strong>
+    </div>
+   </section>
+   <section class="panel">
+    <h2>Rekap suara kandidat — live</h2>
+    <div id="candidateTotals"></div>
+    <p id="summaryNote" class="muted">Menghubungkan ke database…</p>
+   </section>
+   <section class="panel hidden" id="inputPanel">
+    <h2>Input hasil TPS</h2>
+    <p class="muted">Pilih TPS yang menjadi tanggung jawab akun Anda.</p>
+    <div class="field" style="max-width:520px">
+     <label for="tpsSelect">Pilih TPS</label><select id="tpsSelect"></select>
+    </div>
+    <div id="editArea" class="hidden" style="margin-top:12px">
+     <div id="tpsTitle"></div>
+     <div class="fieldgrid">
+      <div class="field">
+       <label>Suara sah</label><input id="valid" readonly value="0">
+      </div>
+      <div class="field">
+       <label for="invalid">Suara tidak sah</label><input id="invalid" type="number" min="0" step="1" value="0">
+      </div>
+      <div class="field">
+       <label>Total suara masuk</label><input id="total" readonly value="0">
+      </div>
+      <div class="field">
+       <label>Sisa DPT perkiraan</label><input id="remaining" readonly value="0">
+      </div>
+     </div>
+     <div style="font-weight:700;margin:14px 0 8px">Suara per calon</div>
+     <div id="candidateInputs"></div>
+     <div class="field" style="margin-top:10px">
+      <label for="notes">Catatan / nomor formulir (opsional)</label><input id="notes" placeholder="Contoh: sumber formulir hasil TPS">
+     </div>
+     <div class="toolbar">
+      <button class="primary" id="saveBtn">Simpan hasil TPS</button>
+      <button id="reloadBtn">Muat ulang</button>
+     </div>
+     <div id="saveStatus" class="muted"></div>
+    </div>
+   </section>
+   <section class="panel">
+    <div class="row">
+     <div>
+      <h2 style="margin:0">Rekap per TPS</h2>
+      <p class="muted">Data diperbarui otomatis.</p>
+     </div>
+     <div>
+      <input id="search" placeholder="Cari TPS">
+     </div>
+    </div>
+    <div class="toolbar">
+     <button id="csvBtn">Unduh rekap CSV</button>
+     <button id="printBtn">Cetak / Simpan PDF</button>
+    </div>
+    <div id="tpsList"></div>
+   </section>
+   <footer>Quick Count Pilkades Desa Kawo · Cocokkan seluruh angka dengan formulir hasil TPS.</footer>
+  </main>
+  <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -32,4 +130,6 @@ async function saveSelected(){if(!selectedNo||!canEdit(selectedNo)){ $("saveStat
 function render(){let dpt=0,masuk=0,filled=0,invalid=0;const ct={};candidates.forEach(c=>ct[c.id]=0);tpsData.forEach(([area,no,d])=>{dpt+=d;const r=allResults[key(no)]||blank(),t=total(r);masuk+=t.all;invalid+=t.invalid;if(t.all>0||r.updatedAt)filled++;candidates.forEach(c=>ct[c.id]+=num(r.votes?.[c.id]));});$("sDpt").textContent=fmt(dpt);$("sMasuk").textContent=fmt(masuk);$("sTps").textContent=`${filled}/18`;$("sPart").textContent=(dpt?masuk/dpt*100:0).toFixed(1).replace(".",",")+"%";$("candidateTotals").innerHTML=candidates.map(c=>`<div class="ct"><small>${esc(c.name)}</small><b>${fmt(ct[c.id])}</b><small>${masuk-invalid?((ct[c.id]/(masuk-invalid))*100).toFixed(1).replace(".",","):"0,0"}% dari suara sah</small></div>`).join("");$("summaryNote").textContent=`Suara sah ${fmt(masuk-invalid)} · Suara tidak sah ${fmt(invalid)} · Total DPT di konfigurasi ${fmt(dpt)}.`;const q=$("search").value.toLowerCase();$("tpsList").innerHTML=tpsData.filter(([a,no])=>(`${a} TPS ${key(no)}`).toLowerCase().includes(q)).map(([a,no,d])=>{const r=allResults[key(no)]||blank(),t=total(r);return `<article class="card"><div class="cardhead"><b>${esc(a)} · TPS ${key(no)}</b><div class="muted">${r.updatedAt?"Ada data":"Belum ada data"}</div></div><div class="cardbody"><div class="fieldgrid"><div class="field"><label>Suara sah</label><input readonly value="${t.valid}"></div><div class="field"><label>Suara tidak sah</label><input readonly value="${t.invalid}"></div><div class="field"><label>Total masuk</label><input readonly value="${t.all}"></div><div class="field"><label>DPT (sementara)</label><input readonly value="${d}"></div></div>${candidates.map(c=>`<div class="row" style="margin:6px 0"><span>${esc(c.name)}</span><b style="text-align:right">${fmt(r.votes?.[c.id])}</b></div>`).join("")}<p class="muted">${r.updatedAt?"Pembaruan: "+esc(new Date(r.updatedAt).toLocaleString("id-ID")):"Belum diinput"}</p></div></article>`}).join("");}
 async function init(){try{app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);onValue(ref(db,"results"),snap=>{allResults=snap.val()||{};render();if(selectedNo)loadSelected();},e=>{$("summaryNote").textContent="Gagal membaca database: "+e.message+". Periksa Rules Firebase.";});onAuthStateChanged(auth,async u=>{user=u;profile=null;$("logoutBtn").classList.toggle("hidden",!u);$("inputPanel").classList.add("hidden");if(!u){say("Belum login. Dashboard publik tetap dapat dilihat.");return;}try{const snap=await get(ref(db,"profiles/"+u.uid));profile=snap.val();if(!profile){say("Login berhasil, tetapi profil akses belum dibuat. Minta admin mengatur profiles/UID akun ini.","err");return;}$("inputPanel").classList.remove("hidden");populateTPS();say("Login berhasil: "+(u.email||"akun petugas"),"ok");}catch(e){say("Gagal membaca profil akses: "+e.message,"err");}});}catch(e){say("Konfigurasi Firebase gagal: "+e.message,"err");}}
 $("loginBtn").addEventListener("click",async()=>{if(!auth){say("Firebase belum siap. Muat ulang halaman.","err");return;}say("Mencoba login…");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);$("password").value="";}catch(e){say("Login gagal. Periksa email/kata sandi. Kode: "+e.code,"err");}});$("logoutBtn").addEventListener("click",()=>signOut(auth));$("tpsSelect").addEventListener("change",()=>{selectedNo=Number($("tpsSelect").value)||null;$("editArea").classList.toggle("hidden",!selectedNo);loadSelected();});$("candidateInputs").addEventListener("input",updateEditor);$("invalid").addEventListener("input",updateEditor);$("saveBtn").addEventListener("click",saveSelected);$("reloadBtn").addEventListener("click",loadSelected);$("search").addEventListener("input",render);$("printBtn").addEventListener("click",()=>window.print());$("csvBtn").addEventListener("click",()=>{const rows=[["TPS","DPT",...candidates.map(c=>c.name),"Suara sah","Tidak sah","Total masuk"]];tpsData.forEach(([a,no,d])=>{const r=allResults[key(no)]||blank(),t=total(r);rows.push([key(no),d,...candidates.map(c=>num(r.votes?.[c.id])),t.valid,t.invalid,t.all]);});const csv="\ufeff"+rows.map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n"),url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download="rekap-quick-count-kawo.csv";a.click();URL.revokeObjectURL(url);});render();init();
-</script></body></html>
+</script>
+ </body>
+</html>
